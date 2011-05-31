@@ -1,5 +1,5 @@
  /*------------------------------------------------------------------------*\
- *  Faketris 0.1
+ *  Faketris 03.
  *  Written by: Logan J. Bell <loganbell@gmail.com>
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -20,6 +20,8 @@
 My version of Tetris
 
 CHANGE HISTORY:
+
+0.3 - Base64ed the images and created an assets library.
 
 0.2 - Added html and CSS file. 
 

@@ -18,7 +18,7 @@
  *-------------------------------------------------------------------------*/
 
 
-var Game = function(){
+var Game = function(window){
     // Game variables
 
     var TABLEHEIGHT = 20;
@@ -26,8 +26,8 @@ var Game = function(){
     var PAUSE       = 0;
     var GAMESPEED   = 500;
     var score       = 0;
-    var VERSION     = 0.2;
-    var IMG_PATH    = '/images/projects/tetris/';
+    var VERSION     = 0.3;
+    var Game_Assets = window['Game_Assets'];     
     var gametimer;
 
     var statuswindow;
@@ -63,7 +63,7 @@ var Game = function(){
             };
 
             this.get_current_bg = function(){
-                return this.shapes[this.currentshape].image;
+                return "url(data:image/gif;base64," + Game_Assets.Images[this.shapes[this.currentshape].color];
             };
 
             this.get_current_shape = function(){
@@ -100,23 +100,19 @@ var Game = function(){
             this.shapes = [
                 {
                     'positions':[[[0,3],[0,4],[0,5],[0,6]],[[0,4],[-1,4],[-2,4],[-3,4]]],
-                    'color': 'blue',
-                    'image': IMG_PATH + 'blue_block.png'
+                    'color': 'blue'
                 }, 
                 {
                     'positions':[[[0,5],[0,6],[1,5],[1,6]]],
-                    'color': 'green',
-                    'image': IMG_PATH + 'green_block.png'
+                    'color': 'green'
                 }, 
                 {
                     'positions':[[[0,3],[0,4],[-1,4],[-1,5]],[[-1,4],[0,4],[0,5],[1,5]]],
-                    'color': 'yellow',
-                    'image': IMG_PATH + 'yellow_block.png'
+                    'color': 'yellow'
                 }, 
                 {
                     'positions':[[[0,3],[0,4],[0,5],[-1,4]],[[-1,4],[0,4],[1,4],[0,5]],[[0,3],[0,4],[0,5],[1,4]],[[-1,4],[0,4],[1,4],[0,3]]],
-                    'color': 'red',
-                    'image': IMG_PATH + 'red_block.png'
+                    'color': 'red'
                 } 
             ];
             
@@ -351,12 +347,12 @@ var Game = function(){
                 statuswindow.innerHTML = 'Game Over';
                 document.getElementById(coord).className = 'edge';
                 document.getElementById(coord).style.backgroundColor=current_color;
-                document.getElementById(coord).style.backgroundImage="url('"+current_imgbg+"')";
+                document.getElementById(coord).style.backgroundImage=current_imgbg;
                 break;
             }
             document.getElementById(coord).className = 'edge';
             document.getElementById(coord).style.backgroundColor=current_color;
-            document.getElementById(coord).style.backgroundImage="url('"+current_imgbg+"')";
+            document.getElementById(coord).style.backgroundImage=current_imgbg;
         }
     }
 
@@ -372,7 +368,7 @@ var Game = function(){
                 var coord = current_position[y];
                 if (document.getElementById(coord)){
                     document.getElementById(coord).style.backgroundColor=current_color;
-                    document.getElementById(coord).style.backgroundImage="url('"+current_imgbg+"')";
+                    document.getElementById(coord).style.backgroundImage=current_imgbg;
 
                 }
             } 
@@ -425,4 +421,4 @@ var Game = function(){
 		    gametimer = setInterval(gameplay,GAMESPEED);
         }
     };
-}();
+}(window);
