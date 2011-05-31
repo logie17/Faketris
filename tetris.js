@@ -26,7 +26,7 @@ var Game = function(){
     var PAUSE       = 0;
     var GAMESPEED   = 500;
     var score       = 0;
-    var VERSION     = 0.1;
+    var VERSION     = 0.2;
     var IMG_PATH    = '/images/projects/tetris/';
     var gametimer;
 
