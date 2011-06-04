@@ -41,6 +41,7 @@ var Game = function(window){
     var P       = 80;    
     var LEFT    = 37;
     var UP      = 38;
+    var DOWN    = 40;
     var RIGHT   = 39;
 
     var Shape = function(){
@@ -135,57 +136,59 @@ var Game = function(window){
 				keynum = e.which;
 			}
 
-            if(keynum == UP){ 
-                current_shape.rotate();    
-                current_position = current_shape.get_current_position();
-            }
-
-			if(keynum == RIGHT){
-                var moveright_ok = 1;
-                for (y in current_position){
-                    var coord = current_position[y];
-                    var nextcoord = [current_position[y][0],current_position[y][1]+1];
-                    if (current_position[y][1]+1 == TABLEWIDTH || document.getElementById(nextcoord).className === 'edge'){
-                        moveright_ok = 0;
-                    }
-                    if (!document.getElementById(nextcoord)){
-                        moveright_ok = 0;
-                    }
-                }
-                if (moveright_ok > 0){
-				    current_shape.moveright();
-                }
-			}	
-
-			if(keynum == LEFT){
-                var moveleft_ok = 1;
-                for (y in current_position){
-                    var coord = current_position[y];
-                    var nextcoord = [current_position[y][0],current_position[y][1]-1];
-                    if (current_position[y][1]- 1 == 0 && document.getElementById(nextcoord).className === 'edge'){
-                        moveleft_ok = 0;
-                    }
-                    if (!document.getElementById(nextcoord)){
-                        moveleft_ok = 0;
-                    }
-                }
-                if (moveleft_ok > 0){
-				    current_shape.moveleft();
-                }
-			}
-
-            if(keynum == P){
-                PAUSE = PAUSE === 1 ? 0 : 1;
-                if(PAUSE === 1){
-				    clearInterval(gametimer);
-					gametimer = null;
-                    statuswindow.innerHTML = 'Game Paused';
-                }else{
-                    gametimer = setInterval(gameplay,GAMESPEED);
-                    statuswindow.innerHTML = 'Game Started';
-                }
-            }
+			switch (keynum) {
+				case UP:
+                	current_shape.rotate();    
+                	current_position = current_shape.get_current_position();
+					break;
+				case DOWN:
+					fall();
+					break;
+				case RIGHT:	
+                	var moveright_ok = 1;
+                	for (y in current_position){
+                	    var coord = current_position[y];
+                	    var nextcoord = [current_position[y][0],current_position[y][1]+1];
+                	    if (current_position[y][1]+1 == TABLEWIDTH || document.getElementById(nextcoord).className === 'edge'){
+                	        moveright_ok = 0;
+                	    }
+                	    if (!document.getElementById(nextcoord)){
+                	        moveright_ok = 0;
+                	    }
+                	}
+                	if (moveright_ok > 0){
+					    current_shape.moveright();
+                	}
+					break;
+				case LEFT:
+                	var moveleft_ok = 1;
+                	for (y in current_position){
+                	    var coord = current_position[y];
+                	    var nextcoord = [current_position[y][0],current_position[y][1]-1];
+                	    if (current_position[y][1]- 1 == 0 && document.getElementById(nextcoord).className === 'edge'){
+                	        moveleft_ok = 0;
+                	    }
+                	    if (!document.getElementById(nextcoord)){
+                	        moveleft_ok = 0;
+                	    }
+                	}
+                	if (moveleft_ok > 0){
+					    current_shape.moveleft();
+                	}
+					break;
+            	case PAUSE:
+                	PAUSE = PAUSE === 1 ? 0 : 1;
+                	if(PAUSE === 1){
+					    clearInterval(gametimer);
+						gametimer = null;
+                	    statuswindow.innerHTML = 'Game Paused';
+                	}else{
+                	    gametimer = setInterval(gameplay,GAMESPEED);
+                	    statuswindow.innerHTML = 'Game Started';
+                	}
+					break;
 						
+			}
 		}
 
     };
