@@ -18,7 +18,7 @@
  *-------------------------------------------------------------------------*/
 
 
-var Game = function(window){
+(function(window){
     // Game variables
 
     var TABLEHEIGHT = 20;
@@ -33,7 +33,6 @@ var Game = function(window){
     var statuswindow;
     var scorewindow;
     var current_shape;
-    var current_position;
     var current_color;
     var current_imgbg;
 
@@ -45,60 +44,102 @@ var Game = function(window){
     var RIGHT   = 39;
 
     var Shape = function(){
-            this.currentposition = 0; 
-            this.currentshape = 1;
-            this.positions = new Array;
 
-            this.init = function(){
-                this.currentshape = Math.floor(Math.random() * this.shapes.length);
-                this.positions = this.shapes[this.currentshape].positions;
-                this.currentposition = Math.floor(Math.random() * this.shapes[this.currentshape].positions.length);
+			var self = this;
+            self.currentposition = 0; 
+            self.currentshape = 1;
+            self.positions = new Array;
+
+            self.init = function(){
+                self.currentshape = Math.floor(Math.random() * self.shapes.length);
+                self.positions = self.shapes[self.currentshape].positions;
+                self.currentposition = Math.floor(Math.random() * self.shapes[self.currentshape].positions.length);
             };
 
-            this.get_current_position = function(){
-                return this.shapes[this.currentshape].positions[this.currentposition];
+            self.get_current_position = function(){
+                return self.shapes[self.currentshape].positions[self.currentposition];
             };
 
-            this.get_current_color = function(){
-                return this.shapes[this.currentshape].color;
+            self.get_current_color = function(){
+                return self.shapes[self.currentshape].color;
             };
 
-            this.get_current_bg = function(){
-                return "url(data:image/gif;base64," + Game_Assets.Images[this.shapes[this.currentshape].color];
+            self.get_current_bg = function(){
+                return "url(data:image/gif;base64," + Game_Assets.Images[self.shapes[self.currentshape].color];
             };
 
-            this.get_current_shape = function(){
-                return this.currentshape;
+            self.get_current_shape = function(){
+                return self.currentshape;
             };
 
-            this.movedown = function() {
-                for (x in this.positions){
-                    for (y in this.positions[x]){
-                        this.positions[x][y][0]++;
+            self.movedown = function() {
+
+        		var current_position = self.get_current_position();
+        		for (y in current_position){
+        		    var coord = current_position[y];
+        		    if (document.getElementById(coord)){
+        		        document.getElementById(coord).style.backgroundColor=current_color;
+        		        document.getElementById(coord).style.backgroundImage=current_imgbg;
+
+        		    }
+        		} 
+
+                for (x in self.positions){
+                    for (y in self.positions[x]){
+                        self.positions[x][y][0]++;
                     }
                 }
             };
 
-            this.moveright = function(){
-                for (x in this.positions){
-                    for (y in this.positions[x]){
-                        this.positions[x][y][1]++;
-                    }
-                }
+            self.moveright = function(){
+				var moveright_ok = 1;
+				var current_position = self.get_current_position();
+               	for (y in current_position){
+               	    var coord = current_position[y];
+               	    var nextcoord = [current_position[y][0],current_position[y][1]+1];
+               	    if (current_position[y][1]+1 == TABLEWIDTH || document.getElementById(nextcoord).className === 'edge'){
+               	        moveright_ok = 0;
+               	    }
+               	    if (!document.getElementById(nextcoord)){
+               	        moveright_ok = 0;
+               	    }
+               	}
+               	if (moveright_ok > 0){
+               		for (x in self.positions){
+               	     for (y in self.positions[x]){
+               	         self.positions[x][y][1]++;
+               	     }
+               	 	}
+				}
             }; 
 
-            this.moveleft = function(){
-                for (x in this.positions){
-                    for (y in this.positions[x]){
-                        this.positions[x][y][1]--;
-                    }
-                }
+            self.moveleft = function(){
+            	var moveleft_ok = 1;
+            	var current_position = self.get_current_position();
+            	for (y in current_position){
+            	    var coord = current_position[y];
+            	    var nextcoord = [current_position[y][0],current_position[y][1]-1];
+            	    if (current_position[y][1]- 1 == 0 && document.getElementById(nextcoord).className === 'edge'){
+            	        moveleft_ok = 0;
+            	    }
+            	    if (!document.getElementById(nextcoord)){
+            	        moveleft_ok = 0;
+            	    }
+            	}
+            	if (moveleft_ok > 0){
+                	for (x in self.positions){
+                	    for (y in self.positions[x]){
+                	        self.positions[x][y][1]--;
+                	    }
+                	}
+				}
             }; 
 
-            this.rotate = function() {
-                this.currentposition = this.currentposition >= (this.positions.length - 1) ? 0 : this.currentposition + 1;
+            self.rotate = function() {
+                self.currentposition = self.currentposition >= (self.positions.length - 1) ? 0 : self.currentposition + 1;
             }; 
-            this.shapes = [
+
+            self.shapes = [
                 {
                     'positions':[[[0,3],[0,4],[0,5],[0,6]],[[0,4],[-1,4],[-2,4],[-3,4]]],
                     'color': 'blue'
@@ -116,10 +157,8 @@ var Game = function(window){
                     'color': 'red'
                 } 
             ];
-            
+
     };
-
-
 
     /*
         Description: Binds keys for game play
@@ -139,42 +178,15 @@ var Game = function(window){
 			switch (keynum) {
 				case UP:
                 	current_shape.rotate();    
-                	current_position = current_shape.get_current_position();
 					break;
 				case DOWN:
-					fall();
+					current_shape.movedown();
 					break;
 				case RIGHT:	
-                	var moveright_ok = 1;
-                	for (y in current_position){
-                	    var coord = current_position[y];
-                	    var nextcoord = [current_position[y][0],current_position[y][1]+1];
-                	    if (current_position[y][1]+1 == TABLEWIDTH || document.getElementById(nextcoord).className === 'edge'){
-                	        moveright_ok = 0;
-                	    }
-                	    if (!document.getElementById(nextcoord)){
-                	        moveright_ok = 0;
-                	    }
-                	}
-                	if (moveright_ok > 0){
-					    current_shape.moveright();
-                	}
+			    	current_shape.moveright();
 					break;
 				case LEFT:
-                	var moveleft_ok = 1;
-                	for (y in current_position){
-                	    var coord = current_position[y];
-                	    var nextcoord = [current_position[y][0],current_position[y][1]-1];
-                	    if (current_position[y][1]- 1 == 0 && document.getElementById(nextcoord).className === 'edge'){
-                	        moveleft_ok = 0;
-                	    }
-                	    if (!document.getElementById(nextcoord)){
-                	        moveleft_ok = 0;
-                	    }
-                	}
-                	if (moveleft_ok > 0){
-					    current_shape.moveleft();
-                	}
+					current_shape.moveleft();
 					break;
             	case PAUSE:
                 	PAUSE = PAUSE === 1 ? 0 : 1;
@@ -233,7 +245,7 @@ var Game = function(window){
 		    clearInterval(gametimer);
 		    gametimer = null;
 
-    }
+    };
    
     /*
         Description: pauses game via clearing gametime
@@ -242,9 +254,7 @@ var Game = function(window){
     */
     start_game = function(){ 
             gametimer = setInterval(gameplay,GAMESPEED);
-    }
-
-
+    };
 
     /*
         Description: scans table for any complete rows
@@ -274,9 +284,7 @@ var Game = function(window){
 
         return reset_table;
 
-    }
-
-
+    };
 
     /*
         Description: scans table for any complete rows
@@ -297,16 +305,13 @@ var Game = function(window){
                         var prev_bg_class = document.getElementById(prevrow+','+col).className;
                         document.getElementById(row+','+col).style.backgroundColor = prev_bg_color;
                         document.getElementById(row+','+col).className = prev_bg_class;
-                        //console.log(prev_bg_color);
                         document.getElementById(prevrow+','+col).style.className = '';
                     }
                 }
             }
         }       
         GAMESPEED *= .90;
-    }
-
-
+    };
 
     /*
         Description: scans table for any complete rows
@@ -315,6 +320,7 @@ var Game = function(window){
     */
     look_down = function(){
         var edge = 0;
+        var current_position = current_shape.get_current_position();
         for (y in current_position){
                 var coord = current_position[y];
                 var nextcoord = [current_position[y][0]+1,current_position[y][1]];
@@ -331,17 +337,16 @@ var Game = function(window){
                 }
         }
         return edge;
-    }
-
-
+    };
 
     /*
-        Description: stops a falling block if an edget is enountered
+        Description: stops a falling block if an edge is enountered
                      and detects if a block has ended the game.
         Input: None
         Output: None
     */
     stop_block = function(){ 
+        var current_position = current_shape.get_current_position();
         for (y in current_position){
             var coord = current_position[y];
             if (coord[0] === 0){
@@ -357,39 +362,17 @@ var Game = function(window){
             document.getElementById(coord).style.backgroundColor=current_color;
             document.getElementById(coord).style.backgroundImage=current_imgbg;
         }
-    }
-
-
-
-    /*
-        Description: Updates the block color and calls the shape object movedown method
-        Input: None
-        Output: None
-    */
-    fall = function(){
-            for (y in current_position){
-                var coord = current_position[y];
-                if (document.getElementById(coord)){
-                    document.getElementById(coord).style.backgroundColor=current_color;
-                    document.getElementById(coord).style.backgroundImage=current_imgbg;
-
-                }
-            } 
-            current_shape.movedown();
-    }
-
-
+    };
 
     /*
         Description: Primary interface function in which the game is played
         Input: None
         Output: None
     */
-    gameplay = function(){
+    gameplay = function() {
         if (!current_shape){
             current_shape = new Shape;
             current_shape.init();
-            current_position =  current_shape.get_current_position();
             current_color = current_shape.get_current_color();
             current_imgbg = current_shape.get_current_bg();
         }
@@ -400,28 +383,29 @@ var Game = function(window){
             clear_table(reset_table);
             start_game();
         }
+
         if (look_down()){
             stop_block();
         }else{
-            fall();
+            current_shape.movedown();
         }
-    }
+    };
 
-    update_score = function()
-    {
+    update_score = function() {
         scorewindow.innerHTML = 'Score is: ' + ++score;
-    }
+    };
 
     /*
         Description: Public method to begin game
         Input: None
         Output: None
     */
-    return { 
+    window['Game'] = { 
         start:function(game_div){
             build_grid(game_div);   
             bind_keys();
 		    gametimer = setInterval(gameplay,GAMESPEED);
         }
     };
-}(window);
+}(window));
+
