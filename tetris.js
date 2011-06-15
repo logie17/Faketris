@@ -75,12 +75,12 @@
             self.movedown = function() {
 
         		var current_position = self.get_current_position();
+
         		for (y in current_position){
         		    var coord = current_position[y];
         		    if (document.getElementById(coord)){
-        		        document.getElementById(coord).style.backgroundColor=current_color;
         		        document.getElementById(coord).style.backgroundImage=current_imgbg;
-
+        		        document.getElementById(coord).style.backgroundColor=current_color;
         		    }
         		} 
 
@@ -89,7 +89,31 @@
                         self.positions[x][y][0]++;
                     }
                 }
+
             };
+    		/*
+    		    Description: scans table for any complete rows
+    		    Input: None
+    		    Output: int
+    		*/
+    		self.look_down = function(){
+    		    var edge = 0;
+				if ( self != null) {
+    		    	var current_position = self.get_current_position();
+    		    	for (y in current_position){
+    		    	        var coord = current_position[y];
+    		    	        var nextcoord = [current_position[y][0]+1,current_position[y][1]];
+    		    	        if (document.getElementById(nextcoord) && document.getElementById(nextcoord).className === 'edge'){
+    		    	            edge = 1;
+    		    	        } else if (coord[0] == (TABLEHEIGHT-1) ){
+    		    	            edge = 1;
+    		    	            document.getElementById(coord).className = 'edge';
+    		    	        }
+    		    	}
+				}
+    		    return edge;
+    		};
+
 
             self.moveright = function(){
 				var moveright_ok = 1;
@@ -142,8 +166,7 @@
             self.shapes = [
                 {
                     'positions':[[[0,3],[0,4],[0,5],[0,6]],[[0,4],[-1,4],[-2,4],[-3,4]]],
-                    'color': 'blue'
-                }, 
+                    'color': 'blue' }, 
                 {
                     'positions':[[[0,5],[0,6],[1,5],[1,6]]],
                     'color': 'green'
@@ -175,31 +198,38 @@
 				keynum = e.which;
 			}
 
-			switch (keynum) {
-				case UP:
-                	current_shape.rotate();    
-					break;
-				case DOWN:
-					current_shape.movedown();
-					break;
-				case RIGHT:	
-			    	current_shape.moveright();
-					break;
-				case LEFT:
-					current_shape.moveleft();
-					break;
-            	case PAUSE:
-                	PAUSE = PAUSE === 1 ? 0 : 1;
-                	if(PAUSE === 1){
-					    clearInterval(gametimer);
-						gametimer = null;
-                	    statuswindow.innerHTML = 'Game Paused';
-                	}else{
-                	    gametimer = setInterval(gameplay,GAMESPEED);
-                	    statuswindow.innerHTML = 'Game Started';
-                	}
-					break;
-						
+			if (current_shape) {
+				switch (keynum) {
+					case UP:
+            	    	current_shape.rotate();    
+						break;
+					case DOWN:
+        				var reset_table = scan_for_complete_rows()
+        				if (current_shape.look_down()){
+        				    stop_block();
+        				}else{
+        				    current_shape.movedown();
+        				}
+						break;
+					case RIGHT:	
+				    	current_shape.moveright();
+						break;
+					case LEFT:
+						current_shape.moveleft();
+						break;
+            		case PAUSE:
+            	    	PAUSE = PAUSE === 1 ? 0 : 1;
+            	    	if(PAUSE === 1){
+						    clearInterval(gametimer);
+							gametimer = null;
+            	    	    statuswindow.innerHTML = 'Game Paused';
+            	    	}else{
+            	    	    gametimer = setInterval(gameplay,GAMESPEED);
+            	    	    statuswindow.innerHTML = 'Game Started';
+            	    	}
+						break;
+							
+				}
 			}
 		}
 
@@ -313,30 +343,34 @@
         GAMESPEED *= .90;
     };
 
+
+
     /*
-        Description: scans table for any complete rows
+        Description: Primary interface function in which the game is played
         Input: None
-        Output: int
+        Output: None
     */
-    look_down = function(){
-        var edge = 0;
-        var current_position = current_shape.get_current_position();
-        for (y in current_position){
-                var coord = current_position[y];
-                var nextcoord = [current_position[y][0]+1,current_position[y][1]];
-                if (document.getElementById(nextcoord) && document.getElementById(nextcoord).className === 'edge'){
-                    edge = 1;
-                    current_shape = '';
-                    continue;
-                }
-                if (coord[0] == (TABLEHEIGHT-1) ){
-                    edge = 1;
-                    current_shape = '';
-                    document.getElementById(coord).className = 'edge';
-                    
-                }
+    gameplay = function() {
+        if (!current_shape){
+            current_shape = new Shape;
+            current_shape.init();
+            current_color = current_shape.get_current_color();
+            current_imgbg = current_shape.get_current_bg();
         }
-        return edge;
+
+        var reset_table = scan_for_complete_rows()
+        if (reset_table){
+            pause_game();
+            update_score();
+            clear_table(reset_table);
+            start_game();
+        }
+
+        if (current_shape.look_down()){
+            stop_block();
+        }else{
+            current_shape.movedown();
+        }
     };
 
     /*
@@ -362,33 +396,7 @@
             document.getElementById(coord).style.backgroundColor=current_color;
             document.getElementById(coord).style.backgroundImage=current_imgbg;
         }
-    };
-
-    /*
-        Description: Primary interface function in which the game is played
-        Input: None
-        Output: None
-    */
-    gameplay = function() {
-        if (!current_shape){
-            current_shape = new Shape;
-            current_shape.init();
-            current_color = current_shape.get_current_color();
-            current_imgbg = current_shape.get_current_bg();
-        }
-        var reset_table = scan_for_complete_rows()
-        if (reset_table){
-            pause_game();
-            update_score();
-            clear_table(reset_table);
-            start_game();
-        }
-
-        if (look_down()){
-            stop_block();
-        }else{
-            current_shape.movedown();
-        }
+		current_shape = null;
     };
 
     update_score = function() {
