@@ -91,6 +91,25 @@
                 }
 
             };
+
+    		self.stop_block = function(){ 
+    		    var current_position = self.get_current_position();
+    		    for (y in current_position){
+    		        var coord = current_position[y];
+    		        if (coord[0] === 0){
+			    	    clearInterval(gametimer);
+			    	    gametimer = null;
+    		            statuswindow.innerHTML = 'Game Over';
+    		            document.getElementById(coord).className = 'edge';
+    		            document.getElementById(coord).style.backgroundColor=current_color;
+    		            document.getElementById(coord).style.backgroundImage=current_imgbg;
+    		            break;
+    		        }
+    		        document.getElementById(coord).className = 'edge';
+    		        document.getElementById(coord).style.backgroundColor=current_color;
+    		        document.getElementById(coord).style.backgroundImage=current_imgbg;
+    		    }
+    		};
     		/*
     		    Description: scans table for any complete rows
     		    Input: None
@@ -183,6 +202,44 @@
 
     };
 
+	var Grid = function (game_div) {
+		var self = this;
+	
+        self.game_element 		= document.getElementById(game_div);
+        self.statuswindow 		= document.createElement("div");
+        self.statuswindow.id 	= 'status_window';
+        self.statuswindow.innerHTML 	= 'Game Started';
+
+    	/*
+    	    Description: builds game gride
+    	    Input: None
+    	    Output: None
+    	*/
+		self.build_grid = function(){
+
+        	self.game_element.appendChild(self.statuswindow);
+
+        	var scorewindow 		= document.createElement("div");
+        	scorewindow.id 			= 'score_window';
+        	scorewindow.innerHTML 	= 'Score is: ' + score;
+        	self.game_element.appendChild(scorewindow);
+
+	    	var table = document.createElement("Table");
+        	table.className="grid";
+	    	for(i = 0; i < TABLEHEIGHT; i++){
+	    		var row = table.insertRow(i);
+	    		for(j=0; j < TABLEWIDTH; j++){
+	    			var cell = row.insertCell(j);
+	    			cell.style.backgroundColor = 'black';
+        	        cell.id = i+','+j;
+	    		}	
+	    	}	
+	    	self.game_element.appendChild(table);
+
+		}
+
+	};
+
     /*
         Description: Binds keys for game play
         Input: None
@@ -206,7 +263,7 @@
 					case DOWN:
         				var reset_table = scan_for_complete_rows()
         				if (current_shape.look_down()){
-        				    stop_block();
+        				    current_shape.stop_block();
         				}else{
         				    current_shape.movedown();
         				}
@@ -233,37 +290,6 @@
 			}
 		}
 
-    };
-
-    /*
-        Description: builds game gride
-        Input: None
-        Output: None
-    */
-    build_grid = function(game_div){
-        game_element = document.getElementById(game_div);
-        statuswindow = document.createElement("div");
-        statuswindow.id = 'status_window';
-        statuswindow.innerHTML = 'Game Started';
-        game_element.appendChild(statuswindow);
-
-        scorewindow = document.createElement("div");
-        scorewindow.id = 'score_window';
-        scorewindow.innerHTML = 'Score is: ' + score;
-        game_element.appendChild(scorewindow);
-
-	    var table = document.createElement("Table");
-        table.className="grid";
-	    for(i = 0; i < TABLEHEIGHT; i++){
-	    	var row = table.insertRow(i);
-	    	for(j=0; j < TABLEWIDTH; j++){
-	    		var cell = row.insertCell(j);
-	    		cell.style.backgroundColor = 'black';
-                cell.id = i+','+j;
-	    	}	
-	    }	
-	    game_element.appendChild(table);
-        return table;
     };
 
     /*
@@ -350,7 +376,7 @@
         Input: None
         Output: None
     */
-    gameplay = function() {
+    var gameplay = function() {
         if (!current_shape){
             current_shape = new Shape;
             current_shape.init();
@@ -367,7 +393,8 @@
         }
 
         if (current_shape.look_down()){
-            stop_block();
+            current_shape.stop_block();
+			stop_block();
         }else{
             current_shape.movedown();
         }
@@ -380,22 +407,6 @@
         Output: None
     */
     stop_block = function(){ 
-        var current_position = current_shape.get_current_position();
-        for (y in current_position){
-            var coord = current_position[y];
-            if (coord[0] === 0){
-	    	    clearInterval(gametimer);
-	    	    gametimer = null;
-                statuswindow.innerHTML = 'Game Over';
-                document.getElementById(coord).className = 'edge';
-                document.getElementById(coord).style.backgroundColor=current_color;
-                document.getElementById(coord).style.backgroundImage=current_imgbg;
-                break;
-            }
-            document.getElementById(coord).className = 'edge';
-            document.getElementById(coord).style.backgroundColor=current_color;
-            document.getElementById(coord).style.backgroundImage=current_imgbg;
-        }
 		current_shape = null;
     };
 
@@ -410,7 +421,8 @@
     */
     window['Game'] = { 
         start:function(game_div){
-            build_grid(game_div);   
+			var grid = new Grid(game_div);	
+            grid.build_grid();   
             bind_keys();
 		    gametimer = setInterval(gameplay,GAMESPEED);
         }
